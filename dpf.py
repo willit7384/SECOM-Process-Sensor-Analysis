@@ -6,6 +6,21 @@ import getpass
 
 """Data Pipeline Functions (dpf.py)"""
 
+def find_constant_features(df: pd.DataFrame, threshold: int = 1):
+    """
+    Returns a list of columns that have 'threshold' or fewer unique values.
+    Useful for dropping constant or near-constant features.
+    
+    Parameters:
+    - df: pandas DataFrame
+    - threshold: max number of unique values to consider a column constant
+    
+    Returns:
+    - List of column names
+    """
+    return [col for col in df.columns if df[col].nunique() <= threshold]
+
+
 def Check(df):
     """
     Provides a comprehensive overview of a pandas DataFrame:
