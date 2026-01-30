@@ -184,3 +184,14 @@ Optional: Deployment sketch (real-time monitoring pipeline)
 **Deliverable:** Markdown section + visuals (dendrogram, correlation clusters, top redundant pairs)
 
 **Why important:** PCA mixes interpretability; redundancy removal keeps original features for better explainability in manufacturing
+
+
+### Conclusion & Interview Takeaways
+
+- PCA showed high redundancy but no clear fail separation.
+- Supervised selection (Boruta/RFE) reduced features to ~70–80 while maintaining or improving performance.
+- SMOTE boosted recall significantly in classification.
+- Isolation Forest at contamination=0.10 achieved the highest fail recall (22.6%) — validates anomaly detection for rare manufacturing defects.
+- Next steps: Tune Isolation Forest further, apply SHAP for explainability on top models, and link key features back to potential process steps (e.g., etch/deposition sensors).
+
+This project demonstrates end-to-end thinking: from cleaning → dimensionality reduction → feature selection → imbalance-aware modeling → anomaly detection.
