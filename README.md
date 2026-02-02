@@ -45,3 +45,5 @@ CROSS VALIDATION, BEST RESULT HAS 33-40% RECALL, STILL MEANINGFUL, ESPECIALLY FO
 Even at 33–40% recall, that's meaningful in manufacturing: catching one-third more fails early avoids scrap, rework, and customer returns.  potentially saving thousands per batch and millions annually in a fab. With more data, senior data scientists, and domain experts (process engineers, physicists, materials scientists), I could fine-tune further: interpret top features in process context, try hybrid sampling (SMOTEENN), add cost-sensitive learning, or incorporate temporal trends.
 
 The *key lesson:* in real semiconductor data, the signal is subtle and buried in noise. No single algorithm solves it.  it's iterative refinement, collaboration with domain experts, and choosing the right tool (supervised vs anomaly) for the business goal: early defect detection to optimize yield and reduce costs.
+
+
