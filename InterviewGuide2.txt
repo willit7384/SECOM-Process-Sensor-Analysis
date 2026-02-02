@@ -1,0 +1,61 @@
+InterviewGuide2
+
+Hi everyone, thank you for having me today.
+
+My name is Theodore Willis. I grew up in the heart of Silicon Valley — the Bay Area — and that’s where I first got interested in technology and problem-solving.
+I started my education at Columbia College in Sonora, California. There I earned a certificate in fire technology and became a certified EMT. I fought wildfires for almost two years, which taught me how to stay calm under pressure and work in high-stakes, team-based environments. When my grandparents needed full-time care, I stepped in as their primary caregiver while finishing my associate’s degree in computer programming at Columbia College. During that time I took courses in algebra, trigonometry, calculus, statistics, Python, JavaScript, HTML/CSS, SQL, operating systems, economics, and physics — basically building a strong technical foundation.
+
+After my grandparents passed, my family moved to Missouri. I transferred to San Jose State University and graduated in December 2025 with a B.S. in Information Science and Data Analytics. The program focused on the full data lifecycle — collecting, managing, analyzing, and communicating insights — with a big emphasis on ethical data use, privacy, security, human-centered design, and translating technical work into decisions that make sense for diverse teams and stakeholders.
+
+Since graduating, I’ve been building my GitHub portfolio to showcase applied projects. The one I’d like to walk you through today is my SECOM Semiconductor Process Sensor Analysis project — I think it’s especially relevant because it deals with real manufacturing sensor data, high dimensionality, rare defect detection, and turning noisy measurements into actionable insights — very similar to the kind of process monitoring challenges Brewer Science works on.
+
+Let me walk you through the pipeline and why each step was in that order.
+First — preprocessing and cleaning.
+
+I started with median imputation to handle missing values — sensor data in fabs often has gaps from failed measurements or downtime, and median is robust to outliers. I also dropped constant and near-constant features. I could have gone further here with domain experts to decide which near-constants were process-specific and worth keeping, but that was my initial cleaning pass.
+
+Next — exploratory data analysis (EDA).
+
+I looked at distributions, correlations, and confirmed the extreme imbalance — 93.4% pass, 6.6% fail. This helped me understand the data structure before jumping into modeling.
+Then — Principal Component Analysis (PCA).
+
+I created scree plots and cumulative explained variance plots to decide how many components to keep — I targeted 85% variance, which gave 109 components from the original 475 features.
+
+I visualized loadings and score plots across multiple PC pairs to see clustering between components.
+
+The goal was to reduce dimensionality, remove redundant features, and maximize captured variance in an exploratory way.
+
+PCA is more about understanding overall structure and noise than directly predicting the target — so it’s exploratory rather than predictive. I could have gone much deeper with domain experts — for example, asking “Does PC1 align with temperature or pressure in a deposition step?” — to interpret loadings in real process terms.
+After PCA — supervised feature selection.
+
+I used two wrapper methods:
+
+Boruta — an all-relevant selection algorithm that compares real features to randomized shadow features using Random Forest importance. It identified 64 confirmed + 7 tentative features (~71 total).
+
+RFE (Recursive Feature Elimination) with XGBoost as the estimator — it recursively removes the least important features until 80 remain.
+
+I noticed good overlap between Boruta and RFE (e.g., Feature_32, Feature_34, Feature_60 appear in both top lists) — that’s a strong validation signal.
+
+This step was critical because PCA is unsupervised and variance-focused; Boruta and RFE are supervised and target-specific — they identify features that actually help predict fails, not just explain variance.
+
+Before modeling — handling imbalance.
+
+The dataset is extremely imbalanced — 93.4% pass vs 6.6% fail. Without balancing, models predict “pass” almost always. I used SMOTE (Synthetic Minority Over-sampling Technique) to generate synthetic fail examples by interpolating between real ones and their nearest neighbors — applied only on training data to avoid leakage.
+
+Then — base modeling with XGBoost.
+
+I chose XGBoost — a gradient-boosted tree algorithm that’s excellent for tabular, heterogeneous data like sensor readings. It handles missing values natively, provides feature importance, and works well with scale_pos_weight for imbalance.
+
+Even after all this prep, initial recall on fails was still low (~0.03–0.06 without balancing, 0.19–0.29 with SMOTE). So I added stratified 5-fold cross-validation (following the SECOM authors’ recommendation for 10-fold CV) to get more reliable averages.
+
+Finally — pivot to unsupervised anomaly detection.
+
+Because classification struggled with the subtle defect signal, I pivoted to Isolation Forest — an unsupervised tree-based algorithm that isolates anomalies by random partitioning. It treats fails as outliers — no labels needed — and achieved 0.226 recall at 10% contamination.
+
+Looking at the CV results, the strongest performer was Boruta-selected features + SMOTE, with average fail recall of 0.396 ± 0.100 — meaning roughly 40% of defects detected on average across folds.
+
+Even at 33–40% recall, that’s meaningful in manufacturing: catching one-third more fails early avoids scrap, rework, and customer returns — potentially saving thousands per batch and millions annually in a fab. With more data, senior data scientists, and domain experts (process engineers, physicists, materials scientists), we could fine-tune further — interpret top features in process context, try hybrid sampling (SMOTEENN), add cost-sensitive learning, or incorporate temporal trends.
+
+The key lesson: in real semiconductor data, the signal is subtle and buried in noise. No single algorithm solves it — it’s iterative refinement, collaboration with domain experts, and choosing the right tool (supervised vs anomaly) for the business goal: early defect detection to optimize yield and reduce costs.
+
+That’s the SECOM project in a nutshell. I’d love to hear how data science teams here tackle similar sensor-heavy process challenges — I’m really excited about the opportunity to contribute in that environment.
